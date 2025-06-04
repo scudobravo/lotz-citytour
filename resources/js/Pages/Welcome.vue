@@ -60,9 +60,17 @@ import { router, usePage } from '@inertiajs/vue3';
 const page = usePage();
 const selectedLanguage = ref(navigator.language.split('-')[0] || 'it');
 const termsAccepted = ref(false);
+const monuments = ref([]);
 
-onMounted(() => {
+onMounted(async () => {
     changeLanguage();
+    // Recupera i monumenti dal database
+    try {
+        const response = await fetch('/api/monuments');
+        monuments.value = await response.json();
+    } catch (error) {
+        console.error('Errore nel recupero dei monumenti:', error);
+    }
 });
 
 const changeLanguage = () => {
@@ -83,10 +91,16 @@ const startTour = () => {
     }
 
     const whatsappNumber = twilioNumber.replace('whatsapp:', '');
+    
+    // Costruisci l'URL della mappa con i monumenti
+    const mapUrl = monuments.value.length > 0
+        ? `https://www.google.com/maps/dir/?api=1&destination=Roma,Italia&waypoints=${monuments.value.map(m => `${m.latitude},${m.longitude}`).join('|')}`
+        : 'https://maps.google.com/?q=Roma,Italia';
+
     const message = encodeURIComponent(
         `${page.props.translations.terms.title}\n\n${page.props.translations.terms.content}\n\n` +
         'Clicca qui per vedere la mappa dei monumenti: ' +
-        'https://maps.google.com/?q=Roma,Italia'
+        mapUrl
     );
 
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
