@@ -60,16 +60,16 @@ import { router, usePage } from '@inertiajs/vue3';
 const page = usePage();
 const selectedLanguage = ref(navigator.language.split('-')[0] || 'it');
 const termsAccepted = ref(false);
-const monuments = ref([]);
+const pointsOfInterest = ref([]);
 
 onMounted(async () => {
     changeLanguage();
-    // Recupera i monumenti dal database
+    // Recupera i punti di interesse dal database
     try {
         const response = await fetch('/api/monuments');
-        monuments.value = await response.json();
+        pointsOfInterest.value = await response.json();
     } catch (error) {
-        console.error('Errore nel recupero dei monumenti:', error);
+        console.error('Errore nel recupero dei punti di interesse:', error);
     }
 });
 
@@ -92,14 +92,15 @@ const startTour = () => {
 
     const whatsappNumber = twilioNumber.replace('whatsapp:', '');
     
-    // Costruisci l'URL della mappa con i monumenti
-    const mapUrl = monuments.value.length > 0
-        ? `https://www.google.com/maps/dir/?api=1&destination=Roma,Italia&waypoints=${monuments.value.map(m => `${m.latitude},${m.longitude}`).join('|')}`
+    // Costruisci l'URL della mappa con i punti di interesse
+    const mapUrl = pointsOfInterest.value.length > 0
+        ? `https://www.google.com/maps/dir/?api=1&destination=Roma,Italia&waypoints=${pointsOfInterest.value.map(p => `${p.latitude},${p.longitude}`).join('|')}`
         : 'https://maps.google.com/?q=Roma,Italia';
 
     const message = encodeURIComponent(
-        `${page.props.translations.terms.title}\n\n${page.props.translations.terms.content}\n\n` +
-        'Clicca qui per vedere la mappa dei monumenti: ' +
+        'Benvenuto in LotzArt! 🎉\n\n' +
+        'Grazie per aver accettato i termini e condizioni. Ora puoi iniziare il tuo tour virtuale di Roma.\n\n' +
+        'Clicca qui per vedere la mappa dei punti di interesse: ' +
         mapUrl
     );
 
