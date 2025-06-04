@@ -67,7 +67,7 @@ onMounted(async () => {
     // Recupera i punti di interesse dal database
     try {
         console.log('Tentativo di recupero dei punti di interesse...');
-        const response = await fetch('/api/monuments');
+        const response = await fetch('/api/points');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

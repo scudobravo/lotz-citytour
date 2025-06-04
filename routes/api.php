@@ -20,5 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/monuments', [MonumentController::class, 'index']);
+// Rotte pubbliche
+Route::get('/points', [MonumentController::class, 'index']);
 Route::post('/twilio/webhook', [TwilioController::class, 'handleIncomingMessage']); 
