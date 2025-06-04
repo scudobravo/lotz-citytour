@@ -66,10 +66,17 @@ onMounted(async () => {
     changeLanguage();
     // Recupera i punti di interesse dal database
     try {
+        console.log('Tentativo di recupero dei punti di interesse...');
         const response = await fetch('/api/monuments');
-        pointsOfInterest.value = await response.json();
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Punti di interesse recuperati:', data);
+        pointsOfInterest.value = data;
     } catch (error) {
         console.error('Errore nel recupero dei punti di interesse:', error);
+        pointsOfInterest.value = [];
     }
 });
 
@@ -98,7 +105,7 @@ const startTour = () => {
         : 'https://maps.google.com/?q=Roma,Italia';
 
     const message = encodeURIComponent(
-        'Benvenuto in LotzArt! 🎉\n\n' +
+        'Benvenuto in City Tour! 🎉\n\n' +
         'Grazie per aver accettato i termini e condizioni. Ora puoi iniziare il tuo tour virtuale di Roma.\n\n' +
         'Clicca qui per vedere la mappa dei punti di interesse: ' +
         mapUrl
