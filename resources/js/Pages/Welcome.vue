@@ -67,8 +67,7 @@ onMounted(async () => {
     // Recupera i punti di interesse dal database
     try {
         console.log('Tentativo di recupero dei punti di interesse...');
-        const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
-        const response = await fetch(`${appUrl}/api/points`);
+        const response = await fetch('/points');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
