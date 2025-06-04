@@ -76,7 +76,13 @@ const changeLanguage = () => {
 const startTour = () => {
     if (!termsAccepted.value) return;
 
-    const whatsappNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER.replace('whatsapp:', '');
+    const twilioNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER;
+    if (!twilioNumber) {
+        console.error('Numero WhatsApp non configurato');
+        return;
+    }
+
+    const whatsappNumber = twilioNumber.replace('whatsapp:', '');
     const message = encodeURIComponent(
         `${page.props.translations.terms.title}\n\n${page.props.translations.terms.content}\n\n` +
         'Clicca qui per vedere la mappa dei monumenti: ' +
