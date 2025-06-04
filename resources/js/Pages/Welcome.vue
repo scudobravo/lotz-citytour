@@ -63,7 +63,6 @@ const termsAccepted = ref(false);
 const pointsOfInterest = ref([]);
 
 onMounted(async () => {
-    changeLanguage();
     // Recupera i punti di interesse dal database
     try {
         console.log('Tentativo di recupero dei punti di interesse...');
