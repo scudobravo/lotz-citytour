@@ -75,7 +75,7 @@ const changeLanguage = () => {
 const startTour = () => {
     if (!termsAccepted.value) return;
 
-    const whatsappNumber = '1234567890'; // Sostituire con il numero effettivo
+    const whatsappNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER;
     const message = encodeURIComponent(
         `${$page.props.translations.terms.title}\n\n${$page.props.translations.terms.content}\n\n` +
         'Clicca qui per vedere la mappa dei monumenti: ' +
