@@ -76,7 +76,7 @@ const changeLanguage = () => {
 const startTour = () => {
     if (!termsAccepted.value) return;
 
-    const twilioNumber = import.meta.env.TWILIO_WHATSAPP_NUMBER;
+    const twilioNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER;
     if (!twilioNumber) {
         console.error('Numero WhatsApp non configurato');
         return;
