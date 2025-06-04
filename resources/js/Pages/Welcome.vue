@@ -100,7 +100,7 @@ const startTour = () => {
     
     // Costruisci l'URL della mappa con i punti di interesse
     const mapUrl = pointsOfInterest.value.length > 0
-        ? `https://www.google.com/maps/dir/?api=1&destination=Roma,Italia&waypoints=${pointsOfInterest.value.map(p => `${p.latitude},${p.longitude}`).join('|')}`
+        ? `https://www.google.com/maps/dir/?api=1&waypoints=${pointsOfInterest.value.map(p => `${p.latitude},${p.longitude}`).join('|')}`
         : 'https://maps.google.com/?q=Roma,Italia';
 
     const message = encodeURIComponent(
