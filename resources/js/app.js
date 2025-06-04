@@ -17,11 +17,17 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
-            .use(plugin)
-            .use(ZiggyVue)
-            .use(i18n)
-            .mount(el);
+        const app = createApp({ render: () => h(App, props) });
+        
+        app.use(plugin)
+           .use(ZiggyVue)
+           .use(i18n);
+        
+        // Imposta la lingua iniziale
+        const locale = navigator.language.split('-')[0] || 'it';
+        i18n.global.locale.value = locale;
+        
+        app.mount(el);
     },
     progress: {
         color: '#4B5563',
