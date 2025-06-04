@@ -63,7 +63,6 @@ const termsAccepted = ref(false);
 const pointsOfInterest = ref([]);
 
 onMounted(async () => {
-    changeLanguage();
     // Recupera i punti di interesse dal database
     try {
         console.log('Tentativo di recupero dei punti di interesse...');
@@ -81,7 +80,7 @@ onMounted(async () => {
 });
 
 const changeLanguage = () => {
-    router.get(route('welcome'), { lang: selectedLanguage.value }, {
+    router.get('/', { lang: selectedLanguage.value }, {
         preserveState: true,
         preserveScroll: true,
         only: ['translations']
