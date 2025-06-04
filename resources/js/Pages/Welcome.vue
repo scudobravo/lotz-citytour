@@ -76,13 +76,14 @@ const changeLanguage = () => {
 const startTour = () => {
     if (!termsAccepted.value) return;
 
-    const whatsappNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER;
+    const whatsappNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER.replace('whatsapp:', '');
     const message = encodeURIComponent(
         `${page.props.translations.terms.title}\n\n${page.props.translations.terms.content}\n\n` +
         'Clicca qui per vedere la mappa dei monumenti: ' +
         'https://maps.google.com/?q=Roma,Italia'
     );
 
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
 };
 </script>
