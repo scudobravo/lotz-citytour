@@ -100,14 +100,16 @@ const startTour = () => {
     
     // Costruisci l'URL della mappa con i punti di interesse
     const mapUrl = pointsOfInterest.value.length > 0
-        ? `https://www.google.com/maps/dir/?api=1&origin=${pointsOfInterest.value[0].latitude},${pointsOfInterest.value[0].longitude}&waypoints=${pointsOfInterest.value.slice(1).map(p => `${p.latitude},${p.longitude}`).join('|')}`
+        ? `https://www.google.com/maps/dir/?api=1&origin=${pointsOfInterest.value[0].latitude},${pointsOfInterest.value[0].longitude}&destination=${pointsOfInterest.value[pointsOfInterest.value.length - 1].latitude},${pointsOfInterest.value[pointsOfInterest.value.length - 1].longitude}&waypoints=${pointsOfInterest.value.slice(1, -1).map(p => `${p.latitude},${p.longitude}`).join('|')}&travelmode=walking`
         : 'https://maps.google.com/?q=Roma,Italia';
 
     const message = encodeURIComponent(
         'Benvenuto in City Tour! 🎉\n\n' +
         'Grazie per aver accettato i termini e condizioni. Ora puoi iniziare il tuo tour virtuale di Roma.\n\n' +
         'Clicca qui per vedere la mappa dei punti di interesse: ' +
-        mapUrl
+        mapUrl + '\n\n' +
+        'Punti di interesse:\n' +
+        pointsOfInterest.value.map((p, index) => `${index + 1}. ${p.name}`).join('\n')
     );
 
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
