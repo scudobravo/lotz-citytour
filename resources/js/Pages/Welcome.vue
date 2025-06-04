@@ -5,7 +5,7 @@
                 <!-- Selettore lingua -->
                 <div class="mb-6">
                     <label for="language" class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ t('terms.select_language') }}
+                        {{ $page.props.translations.terms.select_language }}
                     </label>
                     <select
                         id="language"
@@ -20,12 +20,12 @@
 
                 <!-- Titolo -->
                 <h1 class="text-3xl font-bold text-gray-900 mb-6">
-                    {{ t('terms.title') }}
+                    {{ $page.props.translations.terms.title }}
                 </h1>
 
                 <!-- Contenuto termini e condizioni -->
                 <div class="prose prose-indigo max-w-none mb-8">
-                    <p class="whitespace-pre-line">{{ t('terms.content') }}</p>
+                    <p class="whitespace-pre-line">{{ $page.props.translations.terms.content }}</p>
                 </div>
 
                 <!-- Checkbox accettazione -->
@@ -36,7 +36,7 @@
                             v-model="termsAccepted"
                             class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                         >
-                        <span class="ml-2 text-sm text-gray-700">{{ t('terms.accept') }}</span>
+                        <span class="ml-2 text-sm text-gray-700">{{ $page.props.translations.terms.accept }}</span>
                     </label>
                 </div>
 
@@ -46,7 +46,7 @@
                     :disabled="!termsAccepted"
                     class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {{ t('terms.start') }}
+                    {{ $page.props.translations.terms.start }}
                 </button>
             </div>
         </div>
@@ -55,9 +55,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { router } from '@inertiajs/vue3';
 
-const { t, locale } = useI18n();
 const selectedLanguage = ref(navigator.language.split('-')[0] || 'it');
 const termsAccepted = ref(false);
 
@@ -66,7 +65,11 @@ onMounted(() => {
 });
 
 const changeLanguage = () => {
-    locale.value = selectedLanguage.value;
+    router.get(route('welcome'), { lang: selectedLanguage.value }, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['translations']
+    });
 };
 
 const startTour = () => {
@@ -74,7 +77,7 @@ const startTour = () => {
 
     const whatsappNumber = '1234567890'; // Sostituire con il numero effettivo
     const message = encodeURIComponent(
-        `${t('terms.title')}\n\n${t('terms.content')}\n\n` +
+        `${$page.props.translations.terms.title}\n\n${$page.props.translations.terms.content}\n\n` +
         'Clicca qui per vedere la mappa dei monumenti: ' +
         'https://maps.google.com/?q=Roma,Italia'
     );
