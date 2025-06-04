@@ -55,8 +55,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 
+const page = usePage();
 const selectedLanguage = ref(navigator.language.split('-')[0] || 'it');
 const termsAccepted = ref(false);
 
@@ -77,7 +78,7 @@ const startTour = () => {
 
     const whatsappNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER;
     const message = encodeURIComponent(
-        `${$page.props.translations.terms.title}\n\n${$page.props.translations.terms.content}\n\n` +
+        `${page.props.translations.terms.title}\n\n${page.props.translations.terms.content}\n\n` +
         'Clicca qui per vedere la mappa dei monumenti: ' +
         'https://maps.google.com/?q=Roma,Italia'
     );
