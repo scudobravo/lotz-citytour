@@ -9,7 +9,7 @@ use App\Http\Controllers\MonumentController;
 
 Route::get('/', function () {
     return inertia('Welcome');
-});
+})->name('welcome');
 
 Route::get('/points', [MonumentController::class, 'index']);
 
