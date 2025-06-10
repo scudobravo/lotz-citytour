@@ -107,25 +107,30 @@ class TwilioController extends Controller
         }
 
         // Costruiamo il link di Google Maps con tutti i punti
-        $baseUrl = "https://www.google.com/maps/directions/";
+        $baseUrl = "https://www.google.com/maps/dir/?api=1";
         
         // Il primo punto è l'origine
         $origin = $points->first();
-        $baseUrl .= $origin->latitude . "," . $origin->longitude;
-        
-        // Aggiungiamo tutti i punti intermedi
-        foreach ($points as $index => $point) {
-            if ($index > 0 && $index < $points->count() - 1) {
-                $baseUrl .= "/" . $point->latitude . "," . $point->longitude;
-            }
-        }
+        $baseUrl .= "&origin=" . $origin->latitude . "," . $origin->longitude;
         
         // L'ultimo punto è la destinazione
         $destination = $points->last();
-        $baseUrl .= "/" . $destination->latitude . "," . $destination->longitude;
+        $baseUrl .= "&destination=" . $destination->latitude . "," . $destination->longitude;
         
-        // Aggiungiamo il parametro per il percorso pedonale
-        $baseUrl .= "?travelmode=walking";
+        // I punti intermedi sono waypoints
+        $waypoints = [];
+        foreach ($points as $index => $point) {
+            if ($index > 0 && $index < $points->count() - 1) {
+                $waypoints[] = $point->latitude . "," . $point->longitude;
+            }
+        }
+        
+        if (!empty($waypoints)) {
+            $baseUrl .= "&waypoints=" . implode("|", $waypoints);
+        }
+        
+        // Aggiungiamo i parametri per il percorso pedonale e le indicazioni
+        $baseUrl .= "&travelmode=walking&dir_action=navigate";
         
         $mapsUrl = $baseUrl;
         
