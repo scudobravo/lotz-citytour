@@ -171,15 +171,9 @@ class TwilioController extends Controller
             $messageText .= "{$point->description}\n\n";
         }
 
-        // Aggiungi l'immagine se presente
-        if ($point->image_path) {
-            $this->safeAddMedia($response, $point->image_path, 'image');
-        }
-
-        // Aggiungi l'audio se presente
-        if ($point->audio_path) {
-            $this->safeAddMedia($response, $point->audio_path, 'audio');
-        }
+        // Aggiungi l'immagine di placeholder
+        $imageUrl = "https://placehold.co/600x400?text=" . urlencode($point->name);
+        $this->safeAddMedia($response, $imageUrl, 'image');
 
         // Aggiungi il link per tornare alla mappa
         $messageText .= "\nPer tornare alla mappa, clicca qui:\n";
@@ -197,5 +191,7 @@ class TwilioController extends Controller
     {
         $media = $response->addChild('Message');
         $media->addChild($type, $mediaUrl);
+        // Aggiungiamo un messaggio vuoto dopo l'immagine per evitare problemi di formattazione
+        $response->addChild('Message', '');
     }
 }
