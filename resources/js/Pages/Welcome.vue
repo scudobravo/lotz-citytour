@@ -113,7 +113,16 @@ const startTour = () => {
         '2. Clicca su "Indicazioni"\n' +
         '3. Seleziona "A piedi"\n\n' +
         'Punti di interesse:\n' +
-        pointsOfInterest.value.map((p, index) => `${index + 1}. ${p.name}`).join('\n')
+        pointsOfInterest.value.map((p, index) => {
+            let pointInfo = `${index + 1}. ${p.name}`;
+            if (p.description) {
+                pointInfo += `\n   ${p.description}`;
+            }
+            if (p.image_path) {
+                pointInfo += `\n   Immagine: ${p.image_path}`;
+            }
+            return pointInfo;
+        }).join('\n\n')
     );
 
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
