@@ -107,21 +107,40 @@ class TwilioController extends Controller
         }
 
         // Costruiamo il link di Google Maps con tutti i punti
-        $baseUrl = "google.navigation:q=";
+        $baseUrl = "https://www.google.com/maps/dir/?api=1";
         
         // Il primo punto è l'origine
         $origin = $points->first();
-        $baseUrl .= $origin->latitude . "," . $origin->longitude;
+        $baseUrl .= "&origin=" . $origin->latitude . "," . $origin->longitude;
         
-        // Aggiungiamo il parametro per il percorso pedonale
-        $baseUrl .= "&mode=w";
+        // L'ultimo punto è la destinazione
+        $destination = $points->last();
+        $baseUrl .= "&destination=" . $destination->latitude . "," . $destination->longitude;
+        
+        // I punti intermedi sono waypoints (massimo 8)
+        $waypoints = [];
+        foreach ($points as $index => $point) {
+            if ($index > 0 && $index < $points->count() - 1 && count($waypoints) < 8) {
+                $waypoints[] = $point->latitude . "," . $point->longitude;
+            }
+        }
+        
+        if (!empty($waypoints)) {
+            $baseUrl .= "&waypoints=" . implode("|", $waypoints);
+        }
+        
+        // Aggiungiamo i parametri per il percorso pedonale e la lingua italiana
+        $baseUrl .= "&travelmode=walking&hl=it";
         
         $mapsUrl = $baseUrl;
         
         $messageText = "*{$project->name}* 🗺️\n\n";
-        $messageText .= "Clicca qui per aprire Google Maps e iniziare il tour:\n";
+        $messageText .= "Clicca qui per aprire la mappa con tutti i punti di interesse:\n";
         $messageText .= $mapsUrl . "\n\n";
-        $messageText .= "Per una migliore esperienza, apri il link da smartphone e clicca su \"Indicazioni\" per iniziare la navigazione passo-passo.\n\n";
+        $messageText .= "Per iniziare la navigazione:\n";
+        $messageText .= "1. Apri il link da smartphone\n";
+        $messageText .= "2. Clicca su \"Indicazioni\"\n";
+        $messageText .= "3. Seleziona \"A piedi\"\n\n";
         
         $messageText .= "Punti del tour:\n";
         foreach ($points as $index => $point) {
