@@ -107,36 +107,21 @@ class TwilioController extends Controller
         }
 
         // Costruiamo il link di Google Maps con tutti i punti
-        $baseUrl = "https://www.google.com/maps/dir/?api=1";
+        $baseUrl = "google.navigation:q=";
         
         // Il primo punto è l'origine
         $origin = $points->first();
-        $baseUrl .= "&origin=" . $origin->latitude . "," . $origin->longitude;
-        
-        // L'ultimo punto è la destinazione
-        $destination = $points->last();
-        $baseUrl .= "&destination=" . $destination->latitude . "," . $destination->longitude;
-        
-        // I punti intermedi sono waypoints
-        $waypoints = [];
-        foreach ($points as $index => $point) {
-            if ($index > 0 && $index < $points->count() - 1) {
-                $waypoints[] = $point->latitude . "," . $point->longitude;
-            }
-        }
-        
-        if (!empty($waypoints)) {
-            $baseUrl .= "&waypoints=" . implode("|", $waypoints);
-        }
+        $baseUrl .= $origin->latitude . "," . $origin->longitude;
         
         // Aggiungiamo il parametro per il percorso pedonale
-        $baseUrl .= "&travelmode=walking";
+        $baseUrl .= "&mode=w";
         
         $mapsUrl = $baseUrl;
         
         $messageText = "*{$project->name}* 🗺️\n\n";
-        $messageText .= "Clicca sul link qui sotto per aprire la mappa con tutti i punti di interesse:\n";
+        $messageText .= "Clicca qui per aprire Google Maps e iniziare il tour:\n";
         $messageText .= $mapsUrl . "\n\n";
+        $messageText .= "Per una migliore esperienza, apri il link da smartphone e clicca su \"Indicazioni\" per iniziare la navigazione passo-passo.\n\n";
         
         $messageText .= "Punti del tour:\n";
         foreach ($points as $index => $point) {

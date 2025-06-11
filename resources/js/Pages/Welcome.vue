@@ -100,13 +100,13 @@ const startTour = () => {
     
     // Costruisci l'URL della mappa con i punti di interesse
     const mapUrl = pointsOfInterest.value.length > 0
-        ? `https://www.google.com/maps/directions/current+location/${pointsOfInterest.value[0].latitude},${pointsOfInterest.value[0].longitude}/${pointsOfInterest.value.slice(1).map(p => `${p.latitude},${p.longitude}`).join('/')}?travelmode=walking&dir_action=navigate`
+        ? `google.navigation:q=${pointsOfInterest.value[0].latitude},${pointsOfInterest.value[0].longitude}&mode=w`
         : 'https://maps.google.com/?q=Roma,Italia';
 
     const message = encodeURIComponent(
         'Benvenuto in City Tour! 🎉\n\n' +
         'Grazie per aver accettato i termini e condizioni. Ora puoi iniziare il tuo tour virtuale di Roma.\n\n' +
-        'Clicca qui per vedere la mappa dei punti di interesse: ' +
+        'Clicca qui per aprire Google Maps e iniziare il tour: ' +
         mapUrl + '\n\n' +
         'Punti di interesse:\n' +
         pointsOfInterest.value.map((p, index) => `${index + 1}. ${p.name}`).join('\n')
