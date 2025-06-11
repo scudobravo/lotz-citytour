@@ -114,12 +114,12 @@ const startTour = () => {
         '3. Seleziona "A piedi"\n\n' +
         'Punti di interesse:\n' +
         pointsOfInterest.value.map((p, index) => {
-            const pointUrl = `https://wa.me/${whatsappNumber}?text=point:${p.id}`;
+            const pointUrl = `https://www.google.com/maps/place/${encodeURIComponent(p.name)}/@${p.latitude},${p.longitude},17z/data=!4m14!1m7!3m6!1s0x0:0x0!2s${encodeURIComponent(p.name)}!8m2!3d${p.latitude}!4d${p.longitude}!16zL20vMGQ1cXg!3m5!1s0x0:0x0!8m2!3d${p.latitude}!4d${p.longitude}!16zL20vMGQ1cXg?entry=ttu`;
             let pointInfo = `${index + 1}. *${p.name}*\n`;
             if (p.description) {
                 pointInfo += `   ${p.description}\n`;
             }
-            pointInfo += `   Clicca qui per i dettagli: ${pointUrl}`;
+            pointInfo += `   Clicca qui per vedere la posizione: ${pointUrl}`;
             return pointInfo;
         }).join('\n\n')
     );
