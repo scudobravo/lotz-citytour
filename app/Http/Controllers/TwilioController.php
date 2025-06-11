@@ -148,6 +148,9 @@ class TwilioController extends Controller
             if ($point->description) {
                 $messageText .= "   {$point->description}\n";
             }
+            // Aggiungiamo l'immagine di placeholder
+            $imageUrl = "https://placehold.co/600x400?text=" . urlencode($point->name);
+            $this->safeAddMedia($response, $imageUrl, 'image');
             $messageText .= "\n";
         }
 

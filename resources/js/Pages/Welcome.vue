@@ -112,15 +112,14 @@ const startTour = () => {
         '1. Apri il link da smartphone\n' +
         '2. Clicca su "Indicazioni"\n' +
         '3. Seleziona "A piedi"\n\n' +
-        'Punti di interesse:\n' +
+        'Punti di interesse (clicca sul nome per i dettagli):\n' +
         pointsOfInterest.value.map((p, index) => {
-            let pointInfo = `${index + 1}. ${p.name}`;
+            let pointInfo = `${index + 1}. point:${p.id} - ${p.name}`;
             if (p.description) {
                 pointInfo += `\n   ${p.description}`;
             }
-            if (p.image_path) {
-                pointInfo += `\n   Immagine: ${p.image_path}`;
-            }
+            // Aggiungiamo l'immagine di placeholder
+            pointInfo += `\n   Immagine: https://placehold.co/600x400?text=${encodeURIComponent(p.name)}`;
             return pointInfo;
         }).join('\n\n')
     );
