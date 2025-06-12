@@ -30,12 +30,22 @@ class TwilioController extends Controller
             'from' => $request->input('From'),
             'body' => $request->input('Body'),
             'message_sid' => $request->input('MessageSid'),
-            'headers' => $request->headers->all()
+            'headers' => $request->headers->all(),
+            'raw_content' => $request->getContent(),
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+            'ip' => $request->ip()
         ]);
 
         $from = $request->input('From');
         $body = $request->input('Body', '');
         $messageSid = $request->input('MessageSid');
+
+        // Verifica se il messaggio arriva da WhatsApp
+        if (strpos($from, 'whatsapp:') === false) {
+            Log::warning('Messaggio non da WhatsApp', ['from' => $from]);
+            return response('', 200);
+        }
 
         try {
             $response = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
