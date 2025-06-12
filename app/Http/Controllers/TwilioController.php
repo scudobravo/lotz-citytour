@@ -165,21 +165,20 @@ class TwilioController extends Controller
             return;
         }
 
-        $messageText = "*{$point->name}* 📍\n\n";
-        
-        if ($point->description) {
-            $messageText .= "{$point->description}\n\n";
-        }
+        // 1. Prima inviamo il nome
+        $this->safeAddMessage($response, "*{$point->name}* 📍");
 
-        // Aggiungi l'immagine di placeholder
-        $imageUrl = "https://placehold.co/600x400?text=" . urlencode($point->name);
+        // 2. Poi inviamo l'immagine
+        $imageUrl = $point->image_path ?? "https://placehold.co/600x400?text=" . urlencode($point->name);
         $this->safeAddMedia($response, $imageUrl, 'image');
 
-        // Aggiungi il link per tornare alla mappa
-        $messageText .= "\nPer tornare alla mappa, clicca qui:\n";
-        $messageText .= "project:{$point->project_id}";
+        // 3. Poi inviamo la descrizione
+        if ($point->description) {
+            $this->safeAddMessage($response, "\n{$point->description}");
+        }
 
-        $this->safeAddMessage($response, $messageText);
+        // 4. Infine inviamo il link per tornare alla mappa
+        $this->safeAddMessage($response, "\n\nPer tornare alla mappa, clicca qui:\nproject:{$point->project_id}");
     }
 
     private function safeAddMessage(\SimpleXMLElement $response, string $messageText)
@@ -191,7 +190,5 @@ class TwilioController extends Controller
     {
         $media = $response->addChild('Message');
         $media->addChild($type, $mediaUrl);
-        // Aggiungiamo un messaggio vuoto dopo l'immagine per evitare problemi di formattazione
-        $response->addChild('Message', '');
     }
 }
