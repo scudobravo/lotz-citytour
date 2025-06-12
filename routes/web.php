@@ -20,6 +20,8 @@ Route::post('/twilio/webhook', [App\Http\Controllers\TwilioController::class, 'h
     ->name('twilio.webhook')
     ->withoutMiddleware(['web', 'csrf']);
 
+Route::post('/twilio/test', [App\Http\Controllers\TwilioController::class, 'testWebhook'])->name('twilio.test');
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

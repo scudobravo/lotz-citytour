@@ -23,6 +23,24 @@ class TwilioController extends Controller
         $this->whatsappNumber = config('services.twilio.whatsapp_number');
     }
 
+    public function testWebhook(Request $request)
+    {
+        Log::info('Test webhook ricevuto', [
+            'request' => $request->all(),
+            'headers' => $request->headers->all(),
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+            'ip' => $request->ip()
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Webhook test successful',
+            'timestamp' => now(),
+            'request_data' => $request->all()
+        ]);
+    }
+
     public function handleIncomingMessage(Request $request)
     {
         // Log di tutti i dati della richiesta
