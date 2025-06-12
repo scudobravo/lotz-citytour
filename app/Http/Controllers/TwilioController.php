@@ -7,7 +7,6 @@ use App\Models\PointOfInterest;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Twilio\TwiML\MessagingResponse;
 
 class TwilioController extends Controller
 {
@@ -39,7 +38,7 @@ class TwilioController extends Controller
         $messageSid = $request->input('MessageSid');
 
         try {
-            $response = new MessagingResponse();
+            $response = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
 
             // Se il messaggio contiene un ID di progetto, invia la mappa
             if (preg_match('/project:(\d+)/', $body, $matches)) {
@@ -73,7 +72,7 @@ class TwilioController extends Controller
                 'from' => $from
             ]);
 
-            $response = new MessagingResponse();
+            $response = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
             $this->safeAddMessage($response, 'Mi dispiace, si è verificato un errore. Riprova più tardi.');
             
             return response($response->asXML(), 200)
@@ -81,7 +80,7 @@ class TwilioController extends Controller
         }
     }
 
-    private function sendProjectsList(MessagingResponse $response)
+    private function sendProjectsList(\SimpleXMLElement $response)
     {
         $projects = Project::all();
         
@@ -100,7 +99,7 @@ class TwilioController extends Controller
         $this->safeAddMessage($response, $messageText);
     }
 
-    private function sendProjectMap($projectId, MessagingResponse $response)
+    private function sendProjectMap($projectId, \SimpleXMLElement $response)
     {
         $project = Project::find($projectId);
         if (!$project) {
@@ -175,7 +174,7 @@ class TwilioController extends Controller
         $this->safeAddMessage($response, $messageText);
     }
 
-    private function sendPointDetails($pointId, MessagingResponse $response)
+    private function sendPointDetails($pointId, \SimpleXMLElement $response)
     {
         Log::info('Invio dettagli punto', ['point_id' => $pointId]);
         
@@ -187,40 +186,44 @@ class TwilioController extends Controller
         }
 
         // 1. Prima inviamo il nome
-        $nameMessage = $response->message("*{$point->name}* 📍");
-        $nameMessage->setAttribute('format', 'html');
+        $message = $response->addChild('Message');
+        $message->addChild('Body', "*{$point->name}* 📍");
+        $message->addAttribute('format', 'html');
         Log::info('Nome punto inviato', ['name' => $point->name]);
 
         // 2. Poi inviamo l'immagine
         $imageUrl = $point->image_path ?? "https://placehold.co/600x400?text=" . urlencode($point->name);
-        $imageMessage = $response->message('');
-        $imageMessage->media($imageUrl);
+        $message = $response->addChild('Message');
+        $message->addChild('Media', $imageUrl);
         Log::info('Immagine punto inviata', ['url' => $imageUrl]);
 
         // 3. Poi inviamo la descrizione
         if ($point->description) {
-            $descMessage = $response->message($point->description);
-            $descMessage->setAttribute('format', 'html');
+            $message = $response->addChild('Message');
+            $message->addChild('Body', $point->description);
+            $message->addAttribute('format', 'html');
             Log::info('Descrizione punto inviata', ['description' => $point->description]);
         }
 
         // 4. Infine inviamo il link per tornare alla mappa
-        $mapMessage = $response->message("Per tornare alla mappa, clicca qui:\nproject:{$point->project_id}");
-        $mapMessage->setAttribute('format', 'html');
+        $message = $response->addChild('Message');
+        $message->addChild('Body', "Per tornare alla mappa, clicca qui:\nproject:{$point->project_id}");
+        $message->addAttribute('format', 'html');
         Log::info('Link mappa inviato', ['project_id' => $point->project_id]);
     }
 
-    private function safeAddMessage(MessagingResponse $response, string $messageText)
+    private function safeAddMessage(\SimpleXMLElement $response, string $messageText)
     {
-        $message = $response->message($messageText);
-        $message->setAttribute('format', 'html');
+        $message = $response->addChild('Message');
+        $message->addChild('Body', $messageText);
+        $message->addAttribute('format', 'html');
         Log::info('Messaggio aggiunto alla risposta', ['text' => $messageText]);
     }
 
-    private function safeAddMedia(MessagingResponse $response, string $mediaUrl, string $type)
+    private function safeAddMedia(\SimpleXMLElement $response, string $mediaUrl, string $type)
     {
-        $media = $response->message('');
-        $media->media($mediaUrl);
+        $message = $response->addChild('Message');
+        $message->addChild('Media', $mediaUrl);
         Log::info('Media aggiunta alla risposta', ['url' => $mediaUrl, 'type' => $type]);
     }
 }
