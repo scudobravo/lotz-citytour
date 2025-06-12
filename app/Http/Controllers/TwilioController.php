@@ -25,22 +25,30 @@ class TwilioController extends Controller
 
     public function handleIncomingMessage(Request $request)
     {
-        Log::info('Twilio webhook ricevuto', [
-            'request' => $request->all(),
-            'from' => $request->input('From'),
-            'body' => $request->input('Body'),
-            'message_sid' => $request->input('MessageSid'),
+        // Log di tutti i dati della richiesta
+        Log::info('Twilio webhook ricevuto - Dati completi', [
+            'all_data' => $request->all(),
             'headers' => $request->headers->all(),
-            'raw_content' => $request->getContent(),
             'method' => $request->method(),
             'url' => $request->fullUrl(),
-            'ip' => $request->ip()
+            'ip' => $request->ip(),
+            'raw_content' => $request->getContent()
         ]);
 
         $from = $request->input('From');
-        $body = $request->input('Body', '');
+        $body = trim($request->input('Body', ''));
         $messageSid = $request->input('MessageSid');
         $to = $request->input('To');
+        $numMedia = $request->input('NumMedia', '0');
+
+        // Log specifico per i dati del messaggio
+        Log::info('Dati del messaggio', [
+            'from' => $from,
+            'body' => $body,
+            'message_sid' => $messageSid,
+            'to' => $to,
+            'num_media' => $numMedia
+        ]);
 
         // Verifica se il messaggio arriva da WhatsApp
         if (strpos($from, 'whatsapp:') === false) {
@@ -53,7 +61,8 @@ class TwilioController extends Controller
         Log::info('Configurazione WhatsApp', [
             'config_number' => $whatsappNumber,
             'from_number' => $from,
-            'to_number' => $to
+            'to_number' => $to,
+            'body_trimmed' => $body
         ]);
 
         try {
