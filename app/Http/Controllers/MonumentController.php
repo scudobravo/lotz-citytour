@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PointOfInterest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -28,6 +30,42 @@ class MonumentController extends Controller
                 'error' => 'Errore nel recupero dei punti di interesse',
                 'message' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function show($id, Request $request)
+    {
+        try {
+            $point = PointOfInterest::findOrFail($id);
+            $lang = $request->get('lang', 'it');
+
+            // Log della richiesta
+            Log::info('Richiesta dettagli punto di interesse', [
+                'point_id' => $id,
+                'lang' => $lang,
+                'point' => $point->toArray()
+            ]);
+
+            // Reindirizza a WhatsApp con il comando point
+            $twilioNumber = config('services.twilio.whatsapp_number');
+            $whatsappNumber = str_replace('whatsapp:', '', $twilioNumber);
+            $message = "point:{$id}";
+            
+            $whatsappUrl = "https://wa.me/{$whatsappNumber}?text=" . urlencode($message);
+            
+            return redirect($whatsappUrl);
+
+        } catch (\Exception $e) {
+            Log::error('Errore nel recupero del punto di interesse:', [
+                'point_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'error' => 'Punto di interesse non trovato',
+                'message' => $e->getMessage()
+            ], 404);
         }
     }
 } 

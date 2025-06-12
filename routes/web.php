@@ -6,10 +6,13 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\MonumentController;
+use App\Http\Controllers\PointController;
 
 Route::get('/', [WelcomeController::class, 'index']);
 
 Route::get('/points', [MonumentController::class, 'index']);
+
+Route::get('/point/{id}', [MonumentController::class, 'show'])->name('point.show');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
