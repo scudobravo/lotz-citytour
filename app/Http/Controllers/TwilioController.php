@@ -7,6 +7,7 @@ use App\Models\PointOfInterest;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Twilio\TwiML\MessagingResponse;
 
 class TwilioController extends Controller
 {
@@ -37,7 +38,7 @@ class TwilioController extends Controller
         $messageSid = $request->input('MessageSid');
 
         try {
-            $response = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+            $response = new MessagingResponse();
 
             // Se il messaggio contiene un ID di progetto, invia la mappa
             if (preg_match('/project:(\d+)/', $body, $matches)) {
@@ -63,7 +64,7 @@ class TwilioController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
-            $response = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+            $response = new MessagingResponse();
             $this->safeAddMessage($response, 'Mi dispiace, si è verificato un errore. Riprova più tardi.');
             
             return response($response->asXML(), 200)
@@ -71,7 +72,7 @@ class TwilioController extends Controller
         }
     }
 
-    private function sendProjectsList(\SimpleXMLElement $response)
+    private function sendProjectsList(MessagingResponse $response)
     {
         $projects = Project::all();
         
@@ -89,7 +90,7 @@ class TwilioController extends Controller
         $this->safeAddMessage($response, $messageText);
     }
 
-    private function sendProjectMap($projectId, \SimpleXMLElement $response)
+    private function sendProjectMap($projectId, MessagingResponse $response)
     {
         $project = Project::find($projectId);
         if (!$project) {
@@ -157,7 +158,7 @@ class TwilioController extends Controller
         $this->safeAddMessage($response, $messageText);
     }
 
-    private function sendPointDetails($pointId, \SimpleXMLElement $response)
+    private function sendPointDetails($pointId, MessagingResponse $response)
     {
         $point = PointOfInterest::find($pointId);
         if (!$point) {
@@ -166,29 +167,34 @@ class TwilioController extends Controller
         }
 
         // 1. Prima inviamo il nome
-        $this->safeAddMessage($response, "*{$point->name}* 📍");
+        $nameMessage = $response->message("*{$point->name}* 📍");
+        $nameMessage->setAttribute('format', 'html');
 
         // 2. Poi inviamo l'immagine
         $imageUrl = $point->image_path ?? "https://placehold.co/600x400?text=" . urlencode($point->name);
-        $this->safeAddMedia($response, $imageUrl, 'image');
+        $imageMessage = $response->message('');
+        $imageMessage->media($imageUrl);
 
         // 3. Poi inviamo la descrizione
         if ($point->description) {
-            $this->safeAddMessage($response, "\n{$point->description}");
+            $descMessage = $response->message($point->description);
+            $descMessage->setAttribute('format', 'html');
         }
 
         // 4. Infine inviamo il link per tornare alla mappa
-        $this->safeAddMessage($response, "\n\nPer tornare alla mappa, clicca qui:\nproject:{$point->project_id}");
+        $mapMessage = $response->message("Per tornare alla mappa, clicca qui:\nproject:{$point->project_id}");
+        $mapMessage->setAttribute('format', 'html');
     }
 
-    private function safeAddMessage(\SimpleXMLElement $response, string $messageText)
+    private function safeAddMessage(MessagingResponse $response, string $messageText)
     {
-        $response->addChild('Message', $messageText);
+        $message = $response->message($messageText);
+        $message->setAttribute('format', 'html');
     }
 
-    private function safeAddMedia(\SimpleXMLElement $response, string $mediaUrl, string $type)
+    private function safeAddMedia(MessagingResponse $response, string $mediaUrl, string $type)
     {
-        $media = $response->addChild('Message');
-        $media->addChild($type, $mediaUrl);
+        $media = $response->message('');
+        $media->media($mediaUrl);
     }
 }
