@@ -26,11 +26,12 @@ class TwilioController extends Controller
 
     public function handleIncomingMessage(Request $request)
     {
-        Log::info('Twilio incoming message received', [
+        Log::info('Twilio webhook ricevuto', [
             'request' => $request->all(),
             'from' => $request->input('From'),
             'body' => $request->input('Body'),
-            'message_sid' => $request->input('MessageSid')
+            'message_sid' => $request->input('MessageSid'),
+            'headers' => $request->headers->all()
         ]);
 
         $from = $request->input('From');
@@ -42,26 +43,34 @@ class TwilioController extends Controller
 
             // Se il messaggio contiene un ID di progetto, invia la mappa
             if (preg_match('/project:(\d+)/', $body, $matches)) {
+                Log::info('Comando project rilevato', ['matches' => $matches]);
                 $projectId = $matches[1];
                 $this->sendProjectMap($projectId, $response);
             }
             // Se il messaggio contiene un ID di punto di interesse, invia i dettagli
             elseif (preg_match('/point:(\d+)/', $body, $matches)) {
+                Log::info('Comando point rilevato', ['matches' => $matches]);
                 $pointId = $matches[1];
                 $this->sendPointDetails($pointId, $response);
             }
             // Altrimenti, invia la lista dei progetti disponibili
             else {
+                Log::info('Nessun comando specifico rilevato, invio lista progetti');
                 $this->sendProjectsList($response);
             }
 
-            return response($response->asXML(), 200)
+            $xml = $response->asXML();
+            Log::info('Risposta TwiML generata', ['xml' => $xml]);
+
+            return response($xml, 200)
                 ->header('Content-Type', 'text/xml');
 
         } catch (\Exception $e) {
-            Log::error('Error processing Twilio message', [
+            Log::error('Errore nel processare il messaggio Twilio', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'body' => $body,
+                'from' => $from
             ]);
 
             $response = new MessagingResponse();
@@ -87,6 +96,7 @@ class TwilioController extends Controller
             $messageText .= "\n";
         }
 
+        Log::info('Invio lista progetti', ['message' => $messageText]);
         $this->safeAddMessage($response, $messageText);
     }
 
@@ -94,6 +104,7 @@ class TwilioController extends Controller
     {
         $project = Project::find($projectId);
         if (!$project) {
+            Log::warning('Progetto non trovato', ['project_id' => $projectId]);
             $this->safeAddMessage($response, "Tour non trovato.");
             return;
         }
@@ -103,6 +114,7 @@ class TwilioController extends Controller
                                ->get();
 
         if ($points->isEmpty()) {
+            Log::warning('Nessun punto trovato per il progetto', ['project_id' => $projectId]);
             $this->safeAddMessage($response, "Nessun punto di interesse trovato per questo tour.");
             return;
         }
@@ -155,13 +167,21 @@ class TwilioController extends Controller
             $messageText .= "\n";
         }
 
+        Log::info('Invio mappa progetto', [
+            'project_id' => $projectId,
+            'points_count' => $points->count(),
+            'message_length' => strlen($messageText)
+        ]);
         $this->safeAddMessage($response, $messageText);
     }
 
     private function sendPointDetails($pointId, MessagingResponse $response)
     {
+        Log::info('Invio dettagli punto', ['point_id' => $pointId]);
+        
         $point = PointOfInterest::find($pointId);
         if (!$point) {
+            Log::warning('Punto non trovato', ['point_id' => $pointId]);
             $this->safeAddMessage($response, "Punto di interesse non trovato.");
             return;
         }
@@ -169,32 +189,38 @@ class TwilioController extends Controller
         // 1. Prima inviamo il nome
         $nameMessage = $response->message("*{$point->name}* 📍");
         $nameMessage->setAttribute('format', 'html');
+        Log::info('Nome punto inviato', ['name' => $point->name]);
 
         // 2. Poi inviamo l'immagine
         $imageUrl = $point->image_path ?? "https://placehold.co/600x400?text=" . urlencode($point->name);
         $imageMessage = $response->message('');
         $imageMessage->media($imageUrl);
+        Log::info('Immagine punto inviata', ['url' => $imageUrl]);
 
         // 3. Poi inviamo la descrizione
         if ($point->description) {
             $descMessage = $response->message($point->description);
             $descMessage->setAttribute('format', 'html');
+            Log::info('Descrizione punto inviata', ['description' => $point->description]);
         }
 
         // 4. Infine inviamo il link per tornare alla mappa
         $mapMessage = $response->message("Per tornare alla mappa, clicca qui:\nproject:{$point->project_id}");
         $mapMessage->setAttribute('format', 'html');
+        Log::info('Link mappa inviato', ['project_id' => $point->project_id]);
     }
 
     private function safeAddMessage(MessagingResponse $response, string $messageText)
     {
         $message = $response->message($messageText);
         $message->setAttribute('format', 'html');
+        Log::info('Messaggio aggiunto alla risposta', ['text' => $messageText]);
     }
 
     private function safeAddMedia(MessagingResponse $response, string $mediaUrl, string $type)
     {
         $media = $response->message('');
         $media->media($mediaUrl);
+        Log::info('Media aggiunta alla risposta', ['url' => $mediaUrl, 'type' => $type]);
     }
 }
