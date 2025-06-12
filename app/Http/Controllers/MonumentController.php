@@ -7,7 +7,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Twilio\TwiML\MessagingResponse;
 
 class MonumentController extends Controller
 {
@@ -59,31 +58,6 @@ class MonumentController extends Controller
                 'lang' => $lang,
                 'point' => $point->toArray()
             ]);
-
-            // Crea la risposta TwiML
-            $response = new MessagingResponse();
-
-            // 1. Nome del punto
-            $nameMessage = $response->message("*{$point->name}* 📍");
-            $nameMessage->setAttribute('format', 'html');
-
-            // 2. Immagine (se presente)
-            if ($point->image_path) {
-                $imageUrl = $point->image_path;
-                $imageMessage = $response->message('');
-                $imageMessage->media($imageUrl);
-                Log::info('Immagine aggiunta', ['url' => $imageUrl]);
-            }
-
-            // 3. Descrizione
-            if ($point->description) {
-                $descMessage = $response->message($point->description);
-                $descMessage->setAttribute('format', 'html');
-            }
-
-            // 4. Link per tornare alla mappa
-            $mapMessage = $response->message("Per tornare alla mappa, clicca qui:\nproject:{$point->project_id}");
-            $mapMessage->setAttribute('format', 'html');
 
             // Reindirizza a WhatsApp con il comando point
             $twilioNumber = config('services.twilio.whatsapp_number');
