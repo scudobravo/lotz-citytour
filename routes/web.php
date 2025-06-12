@@ -15,8 +15,10 @@ Route::get('/points', [MonumentController::class, 'index']);
 
 Route::get('/point/{id}', [MonumentController::class, 'show'])->name('point.show');
 
-// Webhook per i messaggi Twilio
-Route::post('/twilio/webhook', [TwilioController::class, 'handleIncomingMessage']);
+// Route per il webhook di Twilio
+Route::post('/twilio/webhook', [App\Http\Controllers\TwilioController::class, 'handleIncomingMessage'])
+    ->name('twilio.webhook')
+    ->withoutMiddleware(['web', 'csrf']);
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

@@ -59,13 +59,24 @@ class MonumentController extends Controller
                 'point' => $point->toArray()
             ]);
 
-            // Reindirizza a WhatsApp con il comando pint
+            // Reindirizza a WhatsApp con il comando point
             $twilioNumber = config('services.twilio.whatsapp_number');
+            Log::info('Configurazione Twilio', [
+                'twilio_number' => $twilioNumber,
+                'config' => config('services.twilio')
+            ]);
+
             $whatsappNumber = str_replace('whatsapp:', '', $twilioNumber);
-            $message = "pint:{$id}";
+            $message = "point:{$id}";
             
             $whatsappUrl = "https://wa.me/{$whatsappNumber}?text=" . urlencode($message);
             
+            Log::info('Reindirizzamento a WhatsApp', [
+                'whatsapp_number' => $whatsappNumber,
+                'message' => $message,
+                'url' => $whatsappUrl
+            ]);
+
             return redirect($whatsappUrl);
 
         } catch (\Exception $e) {
