@@ -195,38 +195,27 @@ class TwilioController extends Controller
             return;
         }
 
-        // 1. Prima inviamo il nome
+        // 1. Prima inviamo il nome e la descrizione insieme
         $message = $response->addChild('Message');
-        $message->addChild('Body', "*{$point->name}* 📍");
-        $message->addAttribute('format', 'html');
-        Log::info('Nome punto inviato', ['name' => $point->name]);
+        $body = "*{$point->name}* 📍\n\n";
+        if ($point->description) {
+            $body .= "{$point->description}\n\n";
+        }
+        $body .= "Per tornare alla mappa, clicca qui:\nproject:{$point->project_id}";
+        $message->addChild('Body', $body);
+        Log::info('Dettagli punto inviati', ['name' => $point->name, 'description' => $point->description]);
 
         // 2. Poi inviamo l'immagine
         $imageUrl = $point->image_path ?? "https://placehold.co/600x400?text=" . urlencode($point->name);
         $message = $response->addChild('Message');
         $message->addChild('Media', $imageUrl);
         Log::info('Immagine punto inviata', ['url' => $imageUrl]);
-
-        // 3. Poi inviamo la descrizione
-        if ($point->description) {
-            $message = $response->addChild('Message');
-            $message->addChild('Body', $point->description);
-            $message->addAttribute('format', 'html');
-            Log::info('Descrizione punto inviata', ['description' => $point->description]);
-        }
-
-        // 4. Infine inviamo il link per tornare alla mappa
-        $message = $response->addChild('Message');
-        $message->addChild('Body', "Per tornare alla mappa, clicca qui:\nproject:{$point->project_id}");
-        $message->addAttribute('format', 'html');
-        Log::info('Link mappa inviato', ['project_id' => $point->project_id]);
     }
 
     private function safeAddMessage(\SimpleXMLElement $response, string $messageText)
     {
         $message = $response->addChild('Message');
         $message->addChild('Body', $messageText);
-        $message->addAttribute('format', 'html');
         Log::info('Messaggio aggiunto alla risposta', ['text' => $messageText]);
     }
 
