@@ -238,7 +238,7 @@ class TwilioController extends Controller
             $body .= "{$point->description}\n\n";
         }
         $body .= "Per tornare alla mappa, clicca qui:\nhttps://www.google.com/maps/d/u/1/edit?mid=1c1VwMgwq0zpDjbEoJ5opdr_kFFOb2Uk&usp=sharing";
-        $message->addChild('Body', $body);
+        $message->addChild('Body', htmlspecialchars($body, ENT_QUOTES | ENT_XML1, 'UTF-8'));
         Log::info('Dettagli punto inviati', ['name' => $point->name, 'description' => $point->description]);
 
         // 2. Invia immagine come media
