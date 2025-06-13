@@ -231,20 +231,20 @@ class TwilioController extends Controller
             return;
         }
 
-        // 1. Prima inviamo il nome e la descrizione insieme
+        // 1. Invia nome e descrizione
         $message = $response->addChild('Message');
         $body = "*{$point->name}* 📍\n\n";
         if ($point->description) {
             $body .= "{$point->description}\n\n";
         }
-        $body .= "Per tornare alla mappa, clicca qui:\nproject:{$point->project_id}";
+        $body .= "Per tornare alla mappa, clicca qui:\nhttps://www.google.com/maps/d/u/1/edit?mid=1c1VwMgwq0zpDjbEoJ5opdr_kFFOb2Uk&usp=sharing";
         $message->addChild('Body', $body);
         Log::info('Dettagli punto inviati', ['name' => $point->name, 'description' => $point->description]);
 
-        // 2. Poi inviamo l'immagine
+        // 2. Invia immagine come media
         $imageUrl = $point->image_path ?? "https://placehold.co/600x400?text=" . urlencode($point->name);
-        $message = $response->addChild('Message');
-        $message->addChild('Media', $imageUrl);
+        $mediaMessage = $response->addChild('Message');
+        $mediaMessage->addChild('Media', $imageUrl);
         Log::info('Immagine punto inviata', ['url' => $imageUrl]);
     }
 
