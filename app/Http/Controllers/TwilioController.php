@@ -242,7 +242,7 @@ class TwilioController extends Controller
         Log::info('Dettagli punto inviati', ['name' => $point->name, 'description' => $point->description]);
 
         // 2. Invia immagine come media
-        $imageUrl = $point->image_path ?? "https://placehold.co/600x400?text=" . urlencode($point->name);
+        $imageUrl = $point->image_path ?? "https://placehold.co/600x400.png?text=" . urlencode($point->name);
         $mediaMessage = $response->addChild('Message');
         $mediaMessage->addChild('Media', $imageUrl);
         Log::info('Immagine punto inviata', ['url' => $imageUrl]);
